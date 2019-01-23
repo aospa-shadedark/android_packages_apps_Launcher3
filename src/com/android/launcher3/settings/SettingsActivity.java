@@ -62,6 +62,7 @@ import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.LauncherPrefs;
+import com.android.launcher3.lineage.trust.TrustAppsActivity;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.display.DisplayController;
@@ -99,6 +100,8 @@ public class SettingsActivity extends CollapsingToolbarBaseActivity
     public static final String SAVE_HIGHLIGHTED_KEY = "android:preference_highlighted";
 
     private static final String KEY_MINUS_ONE = "pref_enable_minus_one";
+
+    private static final String KEY_TRUST_APPS = "pref_trust_apps";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -254,6 +257,18 @@ public class SettingsActivity extends CollapsingToolbarBaseActivity
             setPreferencesFromResource(R.xml.launcher_preferences, rootKey);
 
             PreferenceScreen screen = getPreferenceScreen();
+            Preference trustAppsPreference = screen.findPreference(KEY_TRUST_APPS);
+            if (trustAppsPreference != null) {
+                trustAppsPreference.setOnPreferenceClickListener(p -> {
+                    Utilities.showLockScreen(getActivity(),
+                            getString(R.string.trust_apps_manager_name), () -> {
+                                Intent intent = new Intent(getActivity(), TrustAppsActivity.class);
+                                startActivity(intent);
+                            });
+                    return true;
+                });
+            }
+
             for (int i = screen.getPreferenceCount() - 1; i >= 0; i--) {
                 Preference preference = screen.getPreference(i);
                 if (!initPreference(preference)) {
