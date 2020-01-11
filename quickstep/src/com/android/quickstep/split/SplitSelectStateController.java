@@ -1080,7 +1080,7 @@ public class SplitSelectStateController {
 
             mTaskInfo = taskInfo;
             PackageManager pm = mContext.getPackageManager();
-            IconProvider provider = new IconProvider(mContext);
+            IconProvider provider = com.android.launcher3.LauncherAppState.getInstance(mContext).getIconProvider();
             int displayId = ExternalDisplaysKt.getSafeDisplayId(taskInfo);
 
             try {

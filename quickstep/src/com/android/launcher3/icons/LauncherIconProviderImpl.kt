@@ -54,7 +54,7 @@ constructor(
     private val iconCacheProvider: Provider<IconCache>,
     pluginManagerWrapper: PluginManagerWrapper,
     lifecycle: DaggerSingletonTracker,
-) : LauncherIconProvider(ctx, themeManager), PluginListener<IconProcessorPlugin> {
+) : ThirdPartyIconProvider(ctx, themeManager), PluginListener<IconProcessorPlugin> {
 
     init {
         pluginManagerWrapper.addPluginListener(this, IconProcessorPlugin::class.java)
