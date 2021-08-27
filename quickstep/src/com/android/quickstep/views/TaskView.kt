@@ -76,6 +76,7 @@ import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.launcher3.util.ViewPool
 import com.android.launcher3.util.rects.set
 import com.android.quickstep.FullscreenDrawParams
+import com.android.quickstep.LockedTaskManager
 import com.android.quickstep.RemoteAnimationTargets
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.TaskOverlayFactory
@@ -319,6 +320,8 @@ constructor(
     var isEndQuickSwitchCuj = false
     var isBeingDraggedForDismissal = false
     var isBeingDismissed: Boolean = false
+    var isLocked: Boolean = false
+    private var lockedPackageName: String? = null
 
     private val systemGestureExclusionRectList = listOf(Rect()) // We only need 1 exclusion Rect
 
@@ -1104,6 +1107,7 @@ constructor(
                 }
             }
             setOrientationState(orientedState)
+            updateLockState(firstTask?.key?.packageName)
         }
 
     private fun applyThumbnailSplashAlpha() {
@@ -1887,6 +1891,7 @@ constructor(
             splitSelectTranslationY = 0f
         }
         dismissScale = 1f
+        isLocked = false
         translationZ = 0f
         setIconVisibleForGesture(true)
         settledProgressDismiss = 1f
@@ -1919,6 +1924,18 @@ constructor(
     override fun setAlpha(alpha: Float) {
         super.setAlpha(alpha)
         getTaskIcons().forEach { (icon, _) -> icon.contentAlpha = alpha }
+    }
+
+    fun updateLockState(packageName: String?) {
+        lockedPackageName = packageName
+        val chip = findViewById<IconAppChipView>(R.id.icon)
+        if (packageName == null) {
+            isLocked = false
+            chip?.setLockState(false)
+            return
+        }
+        isLocked = LockedTaskManager.getInstance(context).isPackageLocked(packageName)
+        chip?.setLockState(isLocked)
     }
 
     companion object {

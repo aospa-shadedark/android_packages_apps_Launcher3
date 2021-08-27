@@ -335,6 +335,7 @@ object TaskOverlayModule {
         wellbeingShortcutFactory: WellbeingShortcut.Factory,
     ): List<TaskShortcutFactory> =
         listOf(
+            TaskShortcutFactory.LOCK_APP,
             TaskShortcutFactory.APP_INFO,
             TaskShortcutFactory.KILL_APP,
             TaskShortcutFactory.SPLIT_SELECT,

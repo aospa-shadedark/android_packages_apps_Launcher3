@@ -27,6 +27,7 @@ import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -563,6 +564,55 @@ public interface TaskShortcutFactory {
                 }
             }
             dismissTaskMenuView();
+        }
+    }
+
+    TaskShortcutFactory LOCK_APP = new TaskShortcutFactory() {
+        @Override
+        public List<SystemShortcut> getShortcuts(RecentsViewContainer container,
+                TaskContainer taskContainer) {
+            String packageName = taskContainer.getTask().getTopComponent() != null
+                    ? taskContainer.getTask().getTopComponent().getPackageName()
+                    : null;
+            if (packageName == null) {
+                return null;
+            }
+            Context context = taskContainer.getTaskView().getContext();
+            return Collections.singletonList(new LockAppSystemShortcut(
+                        context, container, taskContainer, packageName));
+        }
+    };
+
+    class LockAppSystemShortcut extends SystemShortcut<RecentsViewContainer> {
+        private static final String TAG = "LockAppSystemShortcut";
+        private final Task mTask;
+        private final String mPackageName;
+        private final Context mContext;
+
+        public LockAppSystemShortcut(Context context, RecentsViewContainer target,
+                TaskContainer taskContainer, String packageName) {
+            this(context, target, taskContainer, packageName,
+                    LockedTaskManager.getInstance(context).isPackageLocked(packageName));
+        }
+
+        private LockAppSystemShortcut(Context context, RecentsViewContainer target,
+                TaskContainer taskContainer, String packageName, boolean isLocked) {
+            super(isLocked ? R.drawable.ic_protected_unlocked : R.drawable.ic_protected_locked,
+                    isLocked ? R.string.unlock_task_from_recents : R.string.lock_task_in_recents,
+                    target, taskContainer.getItemInfo(), taskContainer.getTaskView());
+            mTask = taskContainer.getTask();
+            mPackageName = packageName;
+            mContext = context;
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (mPackageName != null && mTask != null) {
+                LockedTaskManager ltm = LockedTaskManager.getInstance(mContext);
+                ltm.setPackageLocked(mPackageName, !ltm.isPackageLocked(mPackageName));
+                ((TaskView) mOriginalView).updateLockState(mPackageName);
+                dismissTaskMenuView();
+            }
         }
     }
 }

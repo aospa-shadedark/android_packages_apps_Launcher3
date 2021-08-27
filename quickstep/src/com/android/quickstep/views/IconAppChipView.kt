@@ -638,6 +638,14 @@ constructor(
     fun reset() {
         setText(null)
         setDrawable(null)
+        setLockState(false)
+    }
+
+    private var isLockedInRecents = false
+
+    fun setLockState(isLocked: Boolean) {
+        if (isLockedInRecents == isLocked) return
+        isLockedInRecents = isLocked
     }
 
     enum class AppChipStatus {
