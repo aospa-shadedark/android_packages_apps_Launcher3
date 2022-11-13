@@ -140,6 +140,10 @@
         android:key="icon_category"
         android:title="@string/category_icon">
 
+        <Preference
+            android:key="pref_icon_pack"
+            android:title="@string/icon_pack_title" />
+
         <!--
         LAUNCHER_ADD_NEW_APPS_TO_HOME_SCREEN_ENABLED(613)
         LAUNCHER_ADD_NEW_APPS_TO_HOME_SCREEN_DISABLED(614)
