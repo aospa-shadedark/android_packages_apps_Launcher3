@@ -30,6 +30,7 @@ import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriorit
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.pm.UserCache
+import com.android.launcher3.icons.pack.IconPackManager
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.MutableListenableStream
@@ -43,7 +44,7 @@ import javax.inject.Inject
 class IconChangeTracker
 @Inject
 constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
     @LightweightBackground(LightweightBackgroundPriority.UI) executor: LooperExecutor,
     private val userCache: UserCache,
     lifecycleTracker: DaggerSingletonTracker,
@@ -56,7 +57,7 @@ constructor(
     val changes = _changes.asListenable()
 
     init {
-        if (calendar != null || clock != null) {
+        run {
             val receiver =
                 SimpleBroadcastReceiver(context = context, executor = executor) { handleIntent(it) }
             receiver.register(
@@ -79,8 +80,14 @@ constructor(
     }
 
     private fun dispatchCalendarIconChanged() {
-        if (calendar != null)
-            userCache.userProfiles.forEach { notifyIconChanged(calendar.packageName, it) }
+        val packages = mutableSetOf<PackageUserKey>()
+        if (calendar != null) {
+            userCache.userProfiles.forEach { packages.add(PackageUserKey(calendar.packageName, it)) }
+        }
+        IconPackManager.get(context).getCalendarKeys(userCache.userProfiles).forEach {
+            packages.add(PackageUserKey(it.componentName.packageName, it.user))
+        }
+        packages.forEach { notifyIconChanged(it.mPackageName, it.mUser) }
     }
 
     /** Notifies icon change event for [packageName] corresponding to [user] */

@@ -17,6 +17,7 @@ package com.android.quickstep
 
 import android.app.ActivityManager
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Process
@@ -24,9 +25,11 @@ import android.os.UserHandle
 import androidx.annotation.AnyThread
 import androidx.annotation.WorkerThread
 import androidx.core.graphics.drawable.toDrawable
+import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.concurrent.annotations.Ui
+import com.android.launcher3.customization.IconDatabase
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.display.LauncherDisplayInfo
@@ -37,6 +40,7 @@ import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.AppInfoCachingLogic
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.CancellableTask
+import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.SimpleThreadFactory
@@ -95,6 +99,17 @@ constructor(
             Runnable { themeManager.removeChangeListener(themeChangeListener) }
         }
         daggerSingletonTracker.addCloseable(themeManagerWrapper)
+
+        val prefListener =
+            SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                if (key == IconDatabase.KEY_ICON_PACK) {
+                    clearCache()
+                }
+            }
+        LauncherPrefs.getPrefs(context).registerOnSharedPreferenceChangeListener(prefListener)
+        daggerSingletonTracker.addCloseable {
+            LauncherPrefs.getPrefs(context).unregisterOnSharedPreferenceChangeListener(prefListener)
+        }
     }
 
     private fun onDisplayInfoChanged(flags: Int) {
@@ -258,7 +273,9 @@ constructor(
         val icon = getIcon(desc, key.userId)
         val userInfo = UserCache.INSTANCE.get(context).getUserInfo(user)
 
-        if (icon != null) {
+        val usesIconPack = IconDatabase.getByComponent(context, ComponentKey(key.component, user))
+            .isNotEmpty()
+        if (icon != null && !usesIconPack) {
             return ic.iconFactory.use {
                 it.createBadgedIconBitmap(
                     icon.toDrawable(context.resources),
