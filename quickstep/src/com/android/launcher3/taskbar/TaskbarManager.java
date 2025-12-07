@@ -108,6 +108,8 @@ public class TaskbarManager {
 
     private static final Uri NAV_BAR_KIDS_MODE = Settings.Secure.getUriFor(
             Settings.Secure.NAV_BAR_KIDS_MODE);
+    private static final Uri NAVBAR_IME_SPACE_URI = Settings.Secure.getUriFor(
+            "navbar_ime_space");            
 
     private final Context mContext;
     private final @Nullable Context mNavigationBarPanelContext;
@@ -302,6 +304,8 @@ public class TaskbarManager {
                 .register(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
         SettingsCache.INSTANCE.get(mContext)
                 .register(NAV_BAR_KIDS_MODE, mOnSettingsChangeListener);
+        SettingsCache.INSTANCE.get(mContext)
+                .register(NAVBAR_IME_SPACE_URI, mOnSettingsChangeListener);
         Log.d(TASKBAR_NOT_DESTROYED_TAG, "registering component callbacks from constructor.");
         mContext.registerComponentCallbacks(mComponentCallbacks);
         mShutdownReceiver.register(mContext, Intent.ACTION_SHUTDOWN);
@@ -593,6 +597,8 @@ public class TaskbarManager {
                 .unregister(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
         SettingsCache.INSTANCE.get(mContext)
                 .unregister(NAV_BAR_KIDS_MODE, mOnSettingsChangeListener);
+        SettingsCache.INSTANCE.get(mContext)
+                .unregister(NAVBAR_IME_SPACE_URI, mOnSettingsChangeListener);        
         Log.d(TASKBAR_NOT_DESTROYED_TAG, "unregistering component callbacks from destroy().");
         mContext.unregisterComponentCallbacks(mComponentCallbacks);
         mContext.unregisterReceiver(mShutdownReceiver);
