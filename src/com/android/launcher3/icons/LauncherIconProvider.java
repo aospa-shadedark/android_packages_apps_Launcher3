@@ -15,7 +15,13 @@
  */
 package com.android.launcher3.icons;
 
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.text.TextUtils;
@@ -27,6 +33,8 @@ import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.graphics.ThemeManager;
+import com.android.launcher3.util.SafeCloseable;
+import com.android.launcher3.util.AppReloader;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -41,6 +49,9 @@ import javax.inject.Inject;
 @LauncherAppSingleton
 public class LauncherIconProvider extends IconProvider {
 
+    /** Marks icon-pack drawables that must remain unwrapped by adaptive icon loading. */
+    public static final int CONFIG_HINT_NO_WRAP = 0x1000000;
+
     private static final String TAG_ICON = "icon";
     private static final String ATTR_PACKAGE = "package";
     private static final String ATTR_DRAWABLE = "drawable";
@@ -48,16 +59,23 @@ public class LauncherIconProvider extends IconProvider {
     private static final String TAG = "LIconProvider";
     private static final Map<String, ThemeData> DISABLED_MAP = Collections.emptyMap();
 
-    private Map<String, ThemeData> mThemedIconMap;
+    private static final String LAWNICONS_PACKAGE = "app.lawnchair.lawnicons";
+    private static final String LAWNICONS_ICON_MAP_XML = "grayscale_icon_map";
+
+    private volatile Map<String, ThemeData> mThemedIconMap;
+    private volatile String mExternalThemeState;
 
     protected final ThemeManager mThemeManager;
+    protected final Context mContext;
 
     @Inject
     public LauncherIconProvider(
             @ApplicationContext Context context,
             ThemeManager themeManager) {
         super(context);
+        mContext = context;
         mThemeManager = themeManager;
+        mExternalThemeState = getLawniconsState();
         mThemedIconMap = FeatureFlags.USE_LOCAL_ICON_OVERRIDES.get() ? null : DISABLED_MAP;
     }
 
@@ -68,19 +86,63 @@ public class LauncherIconProvider extends IconProvider {
 
     @Override
     public void updateSystemState() {
+        // withAdditionalValues appends. Rebuild the base so repeated reloads remain stable.
+        mSystemState = new PersistedItemState();
         super.updateSystemState();
         mSystemState = mSystemState.withTheme(
                 mThemeManager.getIconState().getThemeCode(),
-                mThemeManager.getIconState().isCircle());
+                mThemeManager.getIconState().isCircle()).withAdditionalValues(mExternalThemeState);
+    }
+
+    private String getLawniconsState() {
+        try {
+            android.content.pm.ApplicationInfo info = mContext.getPackageManager()
+                    .getApplicationInfo(LAWNICONS_PACKAGE, 0);
+            return info.enabled ? info.sourceDir + ":" + info.longVersionCode : "";
+        } catch (PackageManager.NameNotFoundException e) {
+            return "";
+        }
     }
 
     private Map<String, ThemeData> getThemedIconMap() {
         if (mThemedIconMap != null) {
             return mThemedIconMap;
         }
+        ArrayMap<String, ThemeData> map = loadIconMapFromResource(mContext.getResources(), R.xml.grayscale_icon_map);
+        if (isLawniconsAvailable()) {
+            Map<String, ThemeData> m = loadExternalIcons();
+            if (m != null) {
+                map.putAll(m);
+            }
+        }
+        mThemedIconMap = map;
+        return mThemedIconMap;
+    }
+
+    private boolean isLawniconsAvailable() {
+        try {
+            return mContext.getPackageManager().getApplicationInfo(LAWNICONS_PACKAGE, 0).enabled;
+        } catch (PackageManager.NameNotFoundException ignored) {
+            return false;
+        }
+    }
+
+    private Map<String, ThemeData> loadExternalIcons() {
+        try {
+            Resources res = mContext.getPackageManager().getResourcesForApplication(LAWNICONS_PACKAGE);
+            int resId = res.getIdentifier(LAWNICONS_ICON_MAP_XML, "xml", LAWNICONS_PACKAGE);
+            if (resId == 0) {
+                return null;
+            }
+            return loadIconMapFromResource(res, resId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private ArrayMap<String, ThemeData> loadIconMapFromResource(Resources res, int xmlResId) {
         ArrayMap<String, ThemeData> map = new ArrayMap<>();
-        Resources res = mContext.getResources();
-        try (XmlResourceParser parser = res.getXml(R.xml.grayscale_icon_map)) {
+        try (XmlResourceParser parser = res.getXml(xmlResId)) {
             final int depth = parser.getDepth();
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
@@ -102,7 +164,45 @@ public class LauncherIconProvider extends IconProvider {
         } catch (Exception e) {
             Log.e(TAG, "Unable to parse icon map", e);
         }
-        mThemedIconMap = map;
-        return mThemedIconMap;
+        return map;
+    }
+
+    public SafeCloseable registerPackageChangeListener() {
+        return new PackageChangeReceiver();
+    }
+
+    private class PackageChangeReceiver extends BroadcastReceiver implements SafeCloseable {
+
+        PackageChangeReceiver() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+            filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+            filter.addDataScheme("package");
+            mContext.registerReceiver(
+                    this, filter, null, MAIN_EXECUTOR.getHandler(), Context.RECEIVER_NOT_EXPORTED);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String pkg = intent.getData() != null ? intent.getData().getSchemeSpecificPart() : null;
+            if (pkg == null) return;
+            if (LAWNICONS_PACKAGE.equals(pkg)) {
+                mExternalThemeState = getLawniconsState();
+                mThemedIconMap = FeatureFlags.USE_LOCAL_ICON_OVERRIDES.get() ? null : DISABLED_MAP;
+                if (mThemeManager.isMonoThemeEnabled()) {
+                    AppReloader.get(mContext).reload();
+                }
+            }
+        }
+
+        @Override
+        public void close() {
+            try {
+                mContext.unregisterReceiver(this);
+                Log.d(TAG, "PackageChangeReceiver closed");
+            } catch (Exception ignored) { }
+        }
     }
 }
