@@ -762,4 +762,10 @@
     <string name="unlock_task_from_recents">Unlock</string>
     <string name="lock_app">App locked in recents</string>
     <string name="unlock_app">App unlocked in recents</string>
+    <string name="swipe_down_to_lock_title">Swipe down on task to toggle lock</string>
+    <string name="swipe_down_to_lock_summary">Swipe down on a recent task card to lock or unlock it from being cleared</string>
+    <string name="lock_app_prompt">Swipe down to lock</string>
+    <string name="unlock_app_prompt">Swipe down to unlock</string>
+    <string name="lock_app_release_to_confirm">Release to lock</string>
+    <string name="unlock_app_release_to_confirm">Release to unlock</string>
 </resources>

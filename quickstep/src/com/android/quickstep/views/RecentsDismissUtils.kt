@@ -18,6 +18,9 @@ package com.android.quickstep.views
 
 import android.animation.AnimatorSet
 import android.app.ActivityTaskManager.INVALID_TASK_ID
+import android.app.ActivityTaskManager
+import android.app.ActivityManager
+import android.os.Process
 import android.util.Log
 import android.view.View
 import androidx.core.animation.addListener
@@ -36,6 +39,7 @@ import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.util.DynamicResource
 import com.android.launcher3.util.MSDLPlayerWrapper
 import com.android.launcher3.views.ActivityContext
+import com.android.quickstep.LockedTaskManager
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.TaskGridNavHelper
 import com.android.quickstep.views.RecentsView.RECENTS_SCALE_PROPERTY
@@ -333,10 +337,16 @@ constructor(
 
     /** Dismisses all */
     fun dismissAllTasks() {
+        val lockedPkgMgr = LockedTaskManager.getInstance(recentsView.context)
         val allDismissSprings =
             recentsView.mUtils.taskViews
                 .reversed()
-                .filter { taskView -> recentsView.isTaskViewVisible(taskView) }
+                .filter { taskView ->
+                    recentsView.isTaskViewVisible(taskView) &&
+                        taskView.taskContainers.none {
+                            lockedPkgMgr.isPackageLocked(it.task.key.packageName)
+                        }
+                }
                 .mapNotNull { createDismissedTaskViewSpringAnimation(it) }
         SpringSet(SpringAnimation(FloatValueHolder()).setSpring(SpringForce(1f)))
             .playTogether(allDismissSprings)
@@ -346,11 +356,29 @@ constructor(
                     // tasks), and closing all tasks on a desk doesn't always necessarily mean that
                     // the desk will be removed. So, there are no guarantees that the below call to
                     // `ActivityManagerWrapper::removeAllRecentTasks()` will be enough.
-                    systemUiProxy.removeAllDesks(DesktopModeTransitionSource.RECENTS)
+                    if (lockedPkgMgr.getLockedPackages().isEmpty()) {
+                        systemUiProxy.removeAllDesks(DesktopModeTransitionSource.RECENTS)
+                    }
 
                     // Remove all the task views now
                     finishRecentsAnimation(/* toHome */ true, /* shouldPip */ false) {
-                        uiHelperExecutor.execute { activityManagerWrapper.removeAllRecentTasks() }
+                        uiHelperExecutor.execute {
+                            val lockedPkgs = lockedPkgMgr.getLockedPackages()
+                            if (lockedPkgs.isEmpty()) {
+                                activityManagerWrapper.removeAllRecentTasks()
+                            } else {
+                                val recentTasks = ActivityTaskManager.getInstance().getRecentTasks(
+                                    Int.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE,
+                                    activityManagerWrapper.currentUserId)
+                                for (task in recentTasks) {
+                                    val pkg = (task.realActivity ?: task.baseIntent.component)
+                                        ?.packageName
+                                    if (pkg == null || !lockedPkgs.contains(pkg)) {
+                                        activityManagerWrapper.removeTask(task.taskId)
+                                    }
+                                }
+                            }
+                        }
                         removeAllTaskViews()
                         if (!mUtils.isInDesktopFirstMode()) {
                             startHome()

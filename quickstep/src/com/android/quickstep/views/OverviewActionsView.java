@@ -30,7 +30,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
@@ -183,6 +185,15 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
     private boolean mClearAll;
     private boolean mLens;
 
+    private View mLockPillContainer;
+    private TextView mLockPillText;
+    private ImageView mLockPillIcon;
+    private boolean mLockPillShowing = false;
+    private boolean mLockPillAtThreshold = false;
+    private boolean mLockPillInitialLocked = false;
+
+    private static final long LOCK_PILL_FADE_DURATION = 180L;
+
     public OverviewActionsView(Context context) {
         this(context, null);
     }
@@ -209,6 +220,9 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         mActionButtons = findViewById(R.id.action_buttons);
         mSaveAppPairButton = findViewById(R.id.action_save_app_pair);
         TypefaceUtils.setTypeface(mSaveAppPairButton, FontFamily.GSF_LABEL_LARGE);
+        mLockPillContainer = findViewById(R.id.lock_pill_container);
+        mLockPillText = findViewById(R.id.lock_pill_text);
+        mLockPillIcon = findViewById(R.id.lock_pill_icon);
         // Initialize a list to hold alphas for mActionButtons and any group action buttons.
         mMultiValueAlphas[ACTIONS_ALPHAS] = new MultiValueAlpha(mActionButtons, NUM_ALPHAS);
         mMultiValueAlphas[GROUP_ACTIONS_ALPHAS] =
@@ -502,5 +516,62 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
                 : R.drawable.ic_save_app_pair_up_down;
         mSaveAppPairButton.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 appPairIconRes, 0, 0, 0);
+    }
+
+    public void showLockPill(boolean isCurrentlyLocked) {
+        if (mLockPillContainer == null || mLockPillShowing) return;
+        mLockPillShowing = true;
+        mLockPillAtThreshold = false;
+        mLockPillInitialLocked = isCurrentlyLocked;
+        if (mLockPillIcon != null) {
+            mLockPillIcon.setImageResource(isCurrentlyLocked
+                    ? R.drawable.ic_protected_unlocked
+                    : R.drawable.ic_protected_locked);
+        }
+        applyLockPillState();
+        mLockPillContainer.setAlpha(0f);
+        mLockPillContainer.setScaleX(0.85f);
+        mLockPillContainer.setScaleY(0.85f);
+        mLockPillContainer.setVisibility(VISIBLE);
+        mLockPillContainer.animate()
+                .alpha(1f).scaleX(1f).scaleY(1f)
+                .setDuration(LOCK_PILL_FADE_DURATION).start();
+        mActionButtons.animate().alpha(0f).setDuration(LOCK_PILL_FADE_DURATION).start();
+    }
+
+    public void setLockPillAtThreshold(boolean atThreshold) {
+        if (mLockPillContainer == null || !mLockPillShowing) return;
+        if (mLockPillAtThreshold == atThreshold) return;
+        mLockPillAtThreshold = atThreshold;
+        applyLockPillState();
+    }
+
+    private void applyLockPillState() {
+        if (mLockPillText == null) return;
+        int textRes;
+        if (mLockPillAtThreshold) {
+            textRes = mLockPillInitialLocked
+                    ? R.string.unlock_app_release_to_confirm
+                    : R.string.lock_app_release_to_confirm;
+        } else {
+            textRes = mLockPillInitialLocked
+                    ? R.string.unlock_app_prompt
+                    : R.string.lock_app_prompt;
+        }
+        mLockPillText.setText(textRes);
+    }
+
+    public void hideLockPill() {
+        if (mLockPillContainer == null || !mLockPillShowing) return;
+        mLockPillShowing = false;
+        mLockPillContainer.animate()
+                .alpha(0f)
+                .setDuration(LOCK_PILL_FADE_DURATION)
+                .withEndAction(() -> {
+                    if (mLockPillContainer != null) {
+                        mLockPillContainer.setVisibility(GONE);
+                    }
+                }).start();
+        mActionButtons.animate().alpha(1f).setDuration(LOCK_PILL_FADE_DURATION).start();
     }
 }

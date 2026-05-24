@@ -2025,7 +2025,9 @@ public abstract class RecentsView<
         // This handles an edge case where applyLoadPlan happens during a gesture when the only
         // Task is one with excludeFromRecents, in which case we should not remove it.
         CollectionsKt
-                .filter(getTaskViews(), taskView -> !isGestureActive() || !taskView.isRunningTask())
+                .filter(getTaskViews(), taskView -> {
+                    return !isGestureActive() || !taskView.isRunningTask();
+                })
                 .forEach(this::removeView);
         if (!hasTaskViews()) {
             removeView(mAddDesktopButton);

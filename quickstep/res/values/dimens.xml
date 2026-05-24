@@ -650,4 +650,8 @@
     -->
     <dimen name="desktop_windowing_freeform_task_rounded_corner_radius">16dp</dimen>
 
+    <!-- Locked tasks -->
+    <dimen name="task_thumbnail_icon_menu_lock_icon_size">18dp</dimen>
+    <dimen name="task_thumbnail_icon_menu_lock_icon_padding">6dp</dimen>
+
 </resources>

@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator
 import android.animation.RectEvaluator
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Outline
 import android.graphics.Rect
@@ -35,6 +36,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.animation.addListener
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import com.android.app.animation.Interpolators
 import com.android.launcher3.Flags
@@ -641,11 +643,43 @@ constructor(
         setLockState(false)
     }
 
+    private val defaultBackgroundColor = context.getColor(R.color.materialColorSurfaceBright)
+    private val lockedBackgroundColor = context.getColor(R.color.materialColorSecondaryContainer)
+    private val defaultLabelColor = context.getColor(R.color.materialColorOnSurface)
+    private val lockedLabelColor = context.getColor(R.color.materialColorOnSecondaryContainer)
+    private val lockIconSize =
+        resources.getDimensionPixelSize(R.dimen.task_thumbnail_icon_menu_lock_icon_size)
     private var isLockedInRecents = false
 
     fun setLockState(isLocked: Boolean) {
         if (isLockedInRecents == isLocked) return
         isLockedInRecents = isLocked
+        applyLockedVisualState()
+    }
+
+    private fun applyLockedVisualState() {
+        val isLocked = isLockedInRecents
+        setBackgroundColor(if (isLocked) lockedBackgroundColor else defaultBackgroundColor)
+        val tint = if (isLocked) lockedLabelColor else defaultLabelColor
+        appTitle?.setTextColor(tint)
+        updateTitleLockDrawable()
+        iconArrowView?.imageTintList = ColorStateList.valueOf(tint)
+        iconArrowView?.backgroundTintList =
+            if (isLocked) ColorStateList.valueOf(lockedBackgroundColor) else null
+    }
+
+    private fun updateTitleLockDrawable() {
+        val title = appTitle ?: return
+        val lockDrawable =
+            if (isLockedInRecents) {
+                ContextCompat.getDrawable(context, R.drawable.ic_protected_locked)
+                    ?.mutate()
+                    ?.apply {
+                        setBounds(0, 0, lockIconSize, lockIconSize)
+                        setTint(lockedLabelColor)
+                    }
+            } else null
+        title.setCompoundDrawablesRelative(null, null, lockDrawable, null)
     }
 
     enum class AppChipStatus {
