@@ -256,12 +256,14 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
         const val ENABLE_TWO_LINE_TOGGLE_KEY: String = "pref_enable_two_line_toggle"
 
         @JvmField
+        @JvmField
         val ENABLE_TWOLINE_ALLAPPS_TOGGLE =
             backedUpItem(ENABLE_TWO_LINE_TOGGLE_KEY, Boolean::class.java) { context ->
                 DefaultsValueProvider.get(context).enableTwoLineToggle
             }
 
         @JvmField val ALLAPPS_THEMED_ICONS = backedUpItem("pref_allapps_themed_icons", false)
+        @JvmField val NOTIFICATION_BADGE_COUNT = backedUpItem("pref_notification_badge_count", false)
         @JvmField val DRAWER_OPEN_KEYBOARD = backedUpItem("pref_drawer_open_keyboard", false)
         @JvmField val FONT_SIZE = backedUpItem("pref_font_size", 100)
         @JvmField val ICON_PACK = backedUpItem("pref_icon_pack", "")

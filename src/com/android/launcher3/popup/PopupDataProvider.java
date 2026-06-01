@@ -17,11 +17,13 @@
 package com.android.launcher3.popup;
 
 import android.content.ComponentName;
+import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.BubbleTextView;
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.allapps.AllAppsStore;
 import com.android.launcher3.dagger.ActivityContextSingleton;
 import com.android.launcher3.dot.DotInfo;
@@ -68,6 +70,17 @@ public class PopupDataProvider {
 
         mContext.closeOnDestroy(mNotificationRepo.getUpdateStream().forEach(
                 mContext.getUiExecutor(), this::updateNotificationDots));
+        SharedPreferences prefs = LauncherPrefs.getPrefs(mContext.asContext());
+        SharedPreferences.OnSharedPreferenceChangeListener notificationBadgeCountListener =
+                (sharedPreferences, key) -> {
+                    if (LauncherPrefs.NOTIFICATION_BADGE_COUNT.getSharedPrefKey().equals(key)) {
+                        mContext.getUiExecutor().execute(
+                                () -> updateNotificationDots(packageUserKey -> true));
+                    }
+                };
+        prefs.registerOnSharedPreferenceChangeListener(notificationBadgeCountListener);
+        mContext.closeOnDestroy(() ->
+                prefs.unregisterOnSharedPreferenceChangeListener(notificationBadgeCountListener));
     }
 
     private Unit updateNotificationDots(Predicate<PackageUserKey> updatedDots) {

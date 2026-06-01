@@ -416,6 +416,9 @@
 
     <!-- Title for Notification dots setting. Tapping this will link to the system Notifications settings screen where the user can turn off notification dots globally. [CHAR LIMIT=50] -->
     <string name="notification_dots_title">Notification dots</string>
+    <!-- Notification badges -->
+    <string name="notification_badge_count_title">Notification count</string>
+    <string name="notification_badge_count_desc">Show unread counts on notification dots</string>
     <!-- Text to indicate that the system notification dots setting is on [CHAR LIMIT=100] -->
     <string name="notification_dots_desc_on">On</string>
     <!-- Text to indicate that the system notification dots setting is off [CHAR LIMIT=100] -->
