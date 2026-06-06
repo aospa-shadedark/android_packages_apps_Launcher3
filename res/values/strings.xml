@@ -419,6 +419,15 @@
     <!-- Notification badges -->
     <string name="notification_badge_count_title">Notification count</string>
     <string name="notification_badge_count_desc">Show unread counts on notification dots</string>
+
+    <!-- Rename app shortcut -->
+    <string name="rename_app_label">Rename</string>
+    <string name="rename_app_title">Enter app name</string>
+    <string name="app_renamed_successfully">App renamed</string>
+    <string name="rename_app_empty_error">App name cannot be empty</string>
+    <string name="rename_app_length_error">App name must be %1$d characters or less</string>
+    <string name="rename_app_reset">Reset</string>
+    <string name="rename_app_reset_message">Name reset to original</string>
     <!-- Text to indicate that the system notification dots setting is on [CHAR LIMIT=100] -->
     <string name="notification_dots_desc_on">On</string>
     <!-- Text to indicate that the system notification dots setting is off [CHAR LIMIT=100] -->

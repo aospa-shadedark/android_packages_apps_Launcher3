@@ -92,6 +92,7 @@ import static com.android.launcher3.popup.SystemShortcut.ADD_TO_HOME_SCREEN;
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
 import static com.android.launcher3.popup.SystemShortcut.INSTALL;
 import static com.android.launcher3.popup.SystemShortcut.REMOVE;
+import static com.android.launcher3.popup.SystemShortcut.RENAME_APP;
 import static com.android.launcher3.popup.SystemShortcut.UNINSTALL_APP;
 import static com.android.launcher3.popup.SystemShortcut.WIDGETS;
 import static com.android.launcher3.states.RotationHelper.REQUEST_LOCK;
@@ -2820,18 +2821,18 @@ public class Launcher extends StatefulActivity<LauncherState>
     public Stream<SystemShortcut.Factory> getSupportedShortcuts(ItemInfo itemInfo) {
         int container = itemInfo.container;
         if (container == CONTAINER_DESKTOP || container == CONTAINER_HOTSEAT) {
-            return Stream.of(APP_INFO, WIDGETS, INSTALL, UNINSTALL_APP, REMOVE);
+            return Stream.of(APP_INFO, RENAME_APP, WIDGETS, INSTALL, UNINSTALL_APP, REMOVE);
         } else if (container == CONTAINER_ALL_APPS || container == CONTAINER_ALL_APPS_PREDICTION) {
             // TODO(b/444744861): Update private space apps to have its own container.
             boolean isPinnable = itemInfo instanceof ItemInfoWithIcon info
                     && (info.runtimeStatusFlags & FLAG_NOT_PINNABLE) == 0;
             if (isPinnable) {
-                return Stream.of(APP_INFO, WIDGETS, INSTALL, UNINSTALL_APP, ADD_TO_HOME_SCREEN);
+                return Stream.of(APP_INFO, RENAME_APP, WIDGETS, INSTALL, UNINSTALL_APP, ADD_TO_HOME_SCREEN);
             } else {
-                return Stream.of(APP_INFO, WIDGETS, INSTALL, UNINSTALL_APP);
+                return Stream.of(APP_INFO, RENAME_APP, WIDGETS, INSTALL, UNINSTALL_APP);
             }
         }
-        return Stream.of(APP_INFO, WIDGETS, INSTALL, UNINSTALL_APP);
+        return Stream.of(APP_INFO, RENAME_APP, WIDGETS, INSTALL, UNINSTALL_APP);
     }
 
     /**

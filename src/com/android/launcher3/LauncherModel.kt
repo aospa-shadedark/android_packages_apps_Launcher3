@@ -16,6 +16,7 @@
 package com.android.launcher3
 
 import android.content.Context
+import android.content.ComponentName
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
 import android.util.Log
@@ -42,6 +43,7 @@ import com.android.launcher3.model.ModelTaskController
 import com.android.launcher3.model.ModelWriterFactory
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.tasks.CacheDataUpdatedTask
+import com.android.launcher3.model.tasks.CustomAppNameChangedTask
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
@@ -386,6 +388,11 @@ constructor(
                 return mCallbacksList.toTypedArray<BgDataModel.Callbacks>()
             }
         }
+
+    /** Called when a user-defined app display name has changed. */
+    fun onCustomAppNameChanged(component: ComponentName, user: UserHandle) {
+        enqueueModelUpdateTask(CustomAppNameChangedTask(component, user))
+    }
 
     companion object {
         const val TAG = "Launcher.Model"
