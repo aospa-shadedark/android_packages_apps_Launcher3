@@ -393,7 +393,7 @@ public class BaseDepthControllerImpl<
     private @Nullable SurfaceTransaction setupBlurSurface() {
         SurfaceTransaction surfaceTransaction = null;
 
-        if (mBaseSurface != null && mBaseSurfaceOverride != null) {
+        if (mBaseSurface != null && mBaseSurface.isValid() && mBaseSurfaceOverride != null) {
             surfaceTransaction = new SurfaceTransaction();
             surfaceTransaction.forSurface(mBaseSurface).setBackgroundBlurRadius(0).setOpaque(false);
             if (mBlurSurface == null) {

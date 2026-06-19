@@ -188,8 +188,14 @@ class ScalingWorkspaceRevealAnim(
                 launcher.resources.getDimensionPixelSize(R.dimen.max_depth_blur_radius_enhanced)
             val blurAnimator = ValueAnimator.ofFloat(1f, 0f)
             blurAnimator.interpolator = BLUR_INTERPOLATOR
+            var lastBlurRadius = -1
             blurAnimator.addUpdateListener {
-                applyBlur(maxBlurRadius * blurAnimator.animatedValue as Float)
+                val blurRadius = (maxBlurRadius * blurAnimator.animatedValue as Float).toInt()
+                // Always apply when reaching 0 to ensure final state is clean.
+                if (Math.abs(lastBlurRadius - blurRadius) >= 4 || blurRadius == 0) {
+                    applyBlur(blurRadius.toFloat())
+                    lastBlurRadius = blurRadius
+                }
             }
             animation.add(blurAnimator)
 
@@ -248,6 +254,7 @@ class ScalingWorkspaceRevealAnim(
                 override fun onAnimationCancel(animation: Animator) {
                     super.onAnimationCancel(animation)
                     Log.d(TAG, "onAnimationCancel")
+                    applyBlur(0f)
                 }
 
                 override fun onAnimationPause(animation: Animator) {
