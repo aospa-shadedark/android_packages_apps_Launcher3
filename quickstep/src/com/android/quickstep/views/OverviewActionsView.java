@@ -28,6 +28,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -62,6 +64,10 @@ import java.util.Arrays;
 public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayout
         implements OnClickListener, Insettable, SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "OverviewActionsView";
+
+    private static final AccelerateInterpolator PRESS_DOWN_INTERPOLATOR = new AccelerateInterpolator(1.5f);
+    private static final OvershootInterpolator SPRING_BACK_INTERPOLATOR = new OvershootInterpolator(2.5f);
+
     private final Rect mInsets = new Rect();
 
     /**
@@ -272,6 +278,28 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         mCallbacks = callbacks;
     }
 
+    private void animateButtonPress(View view, @Nullable Runnable onPhase1Complete) {
+        view.animate()
+                .scaleX(0.88f)
+                .scaleY(0.88f)
+                .alpha(0.75f)
+                .setDuration(100)
+                .setInterpolator(PRESS_DOWN_INTERPOLATOR)
+                .withEndAction(() -> {
+                    if (onPhase1Complete != null) {
+                        onPhase1Complete.run();
+                    }
+                    view.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .alpha(1f)
+                            .setDuration(200)
+                            .setInterpolator(SPRING_BACK_INTERPOLATOR)
+                            .start();
+                })
+                .start();
+    }
+
     @Override
     public void onClick(View view) {
         if (mCallbacks == null) {
@@ -280,15 +308,15 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         final int id = view.getId();
         VibratorWrapper.INSTANCE.get(getContext()).vibrate(VibratorWrapper.EFFECT_CLICK);
         if (id == R.id.action_screenshot) {
-            mCallbacks.onScreenshot();
+            animateButtonPress(view, mCallbacks::onScreenshot);
         } else if (id == R.id.action_split) {
-            mCallbacks.onSplit();
+            animateButtonPress(view, mCallbacks::onSplit);
         } else if (id == R.id.action_lens) {
-            mCallbacks.onLens();
+            animateButtonPress(view, mCallbacks::onLens);
         } else if (id == R.id.action_clear_all) {
-            mCallbacks.onClearAllTasksRequested();
+            animateButtonPress(view, mCallbacks::onClearAllTasksRequested);
         } else if (id == R.id.action_save_app_pair) {
-            mCallbacks.onSaveAppPair();
+            animateButtonPress(view, mCallbacks::onSaveAppPair);
         }
     }
 
