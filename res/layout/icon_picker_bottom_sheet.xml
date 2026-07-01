@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.android.launcher3.customization.IconPickerBottomSheet
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:theme="?attr/widgetsTheme">
+
+    <LinearLayout
+        android:id="@+id/icon_picker_content"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp">
+
+            <TextView
+                android:id="@+id/icon_picker_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingStart="56dp"
+                android:paddingEnd="56dp"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <ImageButton
+                android:id="@+id/icon_picker_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="start|center_vertical"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/icon_picker_back_content_description"
+                android:padding="12dp"
+                android:src="@drawable/ic_arrow_back_24"
+                android:focusable="true"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <EditText
+            android:id="@+id/icon_picker_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:hint="@string/icon_picker_search_hint"
+            android:inputType="text"
+            android:imeOptions="actionSearch"
+            android:singleLine="true"
+            android:visibility="gone"
+            android:background="@drawable/bg_rounded_corner_bottom_sheet" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/icon_picker_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:padding="16dp" />
+
+        <TextView
+            android:id="@+id/icon_picker_empty"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:gravity="center"
+            android:padding="32dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="gone" />
+    </LinearLayout>
+</com.android.launcher3.customization.IconPickerBottomSheet>
