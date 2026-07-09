@@ -62,7 +62,8 @@ class LauncherDepthController(
     }
 
     override fun onSmallBlurDeltaSkipped() {
-        if (Flags.allAppsBlur() && (shouldBlurWorkspaceNow() && mCurrentBlur > 0) != workspaceBlurActive) {
+        if (!Flags.allAppsSurface() &&
+            (shouldBlurWorkspaceNow() && mCurrentBlur > 0) != workspaceBlurActive) {
             blurWorkspaceDepthTargets()
         }
     }
@@ -94,14 +95,16 @@ class LauncherDepthController(
                     Shader.TileMode.DECAL,
                 ) // If blur is not desired, clear the blur effect from the depth targets.
             else null
-        Log.d(
-            TAG,
-            "shouldBlurWorkspace: $shouldBlurWorkspace" +
-                " targetState: $targetState" +
-                " currentStableState: ${stateManager.currentStableState}" +
-                " mCurrentBlur: $mCurrentBlur" +
-                " mLauncher.getDepthBlurTargets(): ${launcher.depthBlurTargets}",
-        )
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(
+                TAG,
+                "shouldBlurWorkspace: $shouldBlurWorkspace" +
+                    " targetState: $targetState" +
+                    " currentStableState: ${stateManager.currentStableState}" +
+                    " mCurrentBlur: $mCurrentBlur" +
+                    " mLauncher.getDepthBlurTargets(): ${launcher.depthBlurTargets}",
+            )
+        }
         workspaceBlurActive = blurEffect != null
         launcher.depthBlurTargets.forEach { it.setRenderEffect(blurEffect) }
         return shouldBlurWorkspace

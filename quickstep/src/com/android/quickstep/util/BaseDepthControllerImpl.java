@@ -75,7 +75,7 @@ public class BaseDepthControllerImpl<
 
     // b/291401432
     protected static final String TAG = "BaseDepthController";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     protected final CONTAINER mContainer;
     /** Property to set the depth for state transition. */
@@ -242,11 +242,13 @@ public class BaseDepthControllerImpl<
             return;
         }
         if (mBaseSurface == null) {
-            Log.d(TAG, "mSurface is null and mCurrentBlur is: " + mCurrentBlur);
+            if (DEBUG) {
+                Log.d(TAG, "mSurface is null and mCurrentBlur is: " + mCurrentBlur);
+            }
             return;
         }
         if (!mBaseSurface.isValid()) {
-            Log.d(TAG, "mSurface is not valid");
+            if (DEBUG) Log.d(TAG, "mSurface is not valid");
             mWaitingOnSurfaceValidity = true;
             onInvalidSurface();
             return;
@@ -271,8 +273,10 @@ public class BaseDepthControllerImpl<
             return;
         }
         mCurrentBlur = newBlur;
-        Log.v(TAG, "Applying blur: " + mCurrentBlur + " to " + blurSurface + " applyImmediately: "
-                + applyImmediately);
+        if (DEBUG) {
+            Log.v(TAG, "Applying blur: " + mCurrentBlur + " to " + blurSurface + " applyImmediately: "
+                    + applyImmediately);
+        }
 
         if (surfaceTransaction == null) {
             surfaceTransaction = new SurfaceTransaction();
@@ -291,8 +295,10 @@ public class BaseDepthControllerImpl<
         }
 
         if (applyImmediately || mSurfaceTransactionApplier == null) {
-            Log.d(TAG, "Applying blur immediately, mSurfaceTransactionApplier is null? "
-                    + (mSurfaceTransactionApplier == null));
+            if (DEBUG) {
+                Log.d(TAG, "Applying blur immediately, mSurfaceTransactionApplier is null? "
+                        + (mSurfaceTransactionApplier == null));
+            }
             surfaceTransaction.getTransaction().apply();
         } else {
             mSurfaceTransactionApplier.scheduleApply(surfaceTransaction);
@@ -330,7 +336,7 @@ public class BaseDepthControllerImpl<
         if (mInEarlyWakeUp == start) {
             return;
         }
-        Log.d(TAG, "setEarlyWakeup: " + start);
+        if (DEBUG) Log.d(TAG, "setEarlyWakeup: " + start);
         if (start) {
             Trace.instantForTrack(TRACE_TAG_APP, TAG, "notifyRendererForGpuLoadUp");
             mContainer.getRootView().getViewRootImpl().notifyRendererForGpuLoadUp("applyBlur");
@@ -376,7 +382,9 @@ public class BaseDepthControllerImpl<
             boolean applyImmediately = mBaseSurfaceOverride != null && baseSurfaceOverride == null
                     && !applyOnDraw;
             mBaseSurfaceOverride = baseSurfaceOverride;
-            Log.d(TAG, "setBaseSurfaceOverride: applying blur behind leash " + baseSurfaceOverride);
+            if (DEBUG) {
+                Log.d(TAG, "setBaseSurfaceOverride: applying blur behind leash " + baseSurfaceOverride);
+            }
             SurfaceTransaction transaction = setupBlurSurface();
             applyDepthAndBlur(transaction, applyImmediately, /* skipSimilarBlur */ false);
         }
@@ -393,15 +401,18 @@ public class BaseDepthControllerImpl<
                         .setName("Overview Blur")
                         .setHidden(false)
                         .build();
-                Log.d(TAG,
-                        "setupBlurSurface: creating Overview Blur surface " + mBlurSurface);
+                if (DEBUG) {
+                    Log.d(TAG, "setupBlurSurface: creating Overview Blur surface " + mBlurSurface);
+                }
                 surfaceTransaction.forSurface(mBlurSurface).reparent(mBaseSurface);
-                Log.d(TAG, "setupBlurSurface: reparenting " + mBlurSurface + " to " + mBaseSurface);
+                if (DEBUG) {
+                    Log.d(TAG, "setupBlurSurface: reparenting " + mBlurSurface + " to " + mBaseSurface);
+                }
             }
             surfaceTransaction.forSurface(mBlurSurface).setRelativeLayer(mBaseSurfaceOverride, -1);
-            Log.d(TAG, "setupBlurSurface: relayering to leash " + mBaseSurfaceOverride);
+            if (DEBUG) Log.d(TAG, "setupBlurSurface: relayering to leash " + mBaseSurfaceOverride);
         } else if (mBlurSurface != null) {
-            Log.d(TAG, "setupBlurSurface: removing blur surface " + mBlurSurface);
+            if (DEBUG) Log.d(TAG, "setupBlurSurface: removing blur surface " + mBlurSurface);
             surfaceTransaction = new SurfaceTransaction();
             surfaceTransaction.forSurface(mBlurSurface).setRemove();
             mBlurSurface = null;
@@ -415,8 +426,10 @@ public class BaseDepthControllerImpl<
     protected void setBaseSurface(SurfaceControl baseSurface) {
         if (mBaseSurface != baseSurface || mWaitingOnSurfaceValidity) {
             mBaseSurface = baseSurface;
-            Log.d(TAG, "setSurface:\n\tmWaitingOnSurfaceValidity: " + mWaitingOnSurfaceValidity
-                    + "\n\tmBaseSurface: " + mBaseSurface);
+            if (DEBUG) {
+                Log.d(TAG, "setSurface:\n\tmWaitingOnSurfaceValidity: " + mWaitingOnSurfaceValidity
+                        + "\n\tmBaseSurface: " + mBaseSurface);
+            }
             SurfaceTransaction transaction = setupBlurSurface();
             applyDepthAndBlur(transaction, /* applyImmediately */ false,
                     /* skipSimilarBlur */ false);
