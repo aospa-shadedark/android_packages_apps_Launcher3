@@ -75,7 +75,7 @@ import java.util.function.Consumer;
 public class OtherActivityInputConsumer extends ContextWrapper implements InputConsumer {
 
     private static final String TAG = "OtherActivityInputConsumer";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     public static final String DOWN_EVT = "OtherActivityInputConsumer.DOWN";
     private static final String UP_EVT = "OtherActivityInputConsumer.UP";
