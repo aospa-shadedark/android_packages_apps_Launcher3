@@ -15,6 +15,6 @@
 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
-        android:color="@android:color/system_neutral2_900"
-        android:lStar="12" />
+        android:color="@android:color/system_accent2_800"
+        android:alpha="0.8" />
 </selector>
