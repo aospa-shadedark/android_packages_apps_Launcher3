@@ -40,7 +40,6 @@ import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLA
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_SECONDARY_LAUNCHER_ON_CD;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_APP_AUTO;
 import static com.android.launcher3.taskbar.TaskbarStashController.SHOULD_BUBBLES_FOLLOW_DEFAULT_VALUE;
-import static com.android.launcher3.testing.shared.ResourceUtils.getBoolByName;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.Executors.getTaskbarUiThread;
@@ -229,12 +228,11 @@ import java.util.function.Predicate;
  */
 public class TaskbarActivityContext extends BaseTaskbarContext {
 
-    private static final String IME_DRAWS_IME_NAV_BAR_RES_NAME = "config_imeDrawsImeNavBar";
-
     private static final Uri URI_USER_SETUP_COMPLETE = Secure.getUriFor(Secure.USER_SETUP_COMPLETE);
     private static final Uri URI_NAV_BAR_KIDS_MODE = Secure.getUriFor(Secure.NAV_BAR_KIDS_MODE);
     private static final Uri URI_NAVIGATION_BAR_HINT = Settings.Secure.getUriFor(
             Settings.Secure.NAVIGATION_BAR_HINT);
+    private static final Uri URI_NAV_BAR_IME = Secure.getUriFor("sysui_show_nav_bar_ime");
 
     private static final String TAG = "TaskbarActivityContext";
 
@@ -356,6 +354,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mIsUserSetupComplete = settingsCache.getValue(URI_USER_SETUP_COMPLETE);
         mIsNavBarKidsMode = settingsCache.getValue(URI_NAV_BAR_KIDS_MODE);
         mIsNavbarHintEnabled = settingsCache.getValue(URI_NAVIGATION_BAR_HINT);
+        mImeDrawsImeNavBar = Settings.Secure.getInt(
+                getContentResolver(), URI_NAV_BAR_IME.getLastPathSegment(), 1) != 0;
         mBubbleFeatureConfig =
                 new BubbleFeatureConfigImpl(mWindowContext, getDesktopState(mWindowContext));
 
@@ -366,8 +366,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 mDeviceProfile.inv.numRows,
                 mDeviceProfile.inv.numColumns);
 
-        mImeDrawsImeNavBar = getBoolByName(IME_DRAWS_IME_NAV_BAR_RES_NAME, getResources(), false)
-                && isPrimaryDisplay();
         mIsSafeModeEnabled = TraceHelper.allowIpcs("isSafeMode",
                 () -> getPackageManager().isSafeMode());
 
@@ -623,8 +621,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
  *                     for the taskbar create/recreate process.
      */
     public void init(@NonNull TaskbarSharedState sharedState, boolean userUnlocked, int duration) {
-        mImeDrawsImeNavBar = getBoolByName(IME_DRAWS_IME_NAV_BAR_RES_NAME, getResources(), false)
-                && isPrimaryDisplay();
+        mImeDrawsImeNavBar = Settings.Secure.getInt(
+                getContentResolver(), URI_NAV_BAR_IME.getLastPathSegment(), 1) != 0;
         mLastRequestedNonFullscreenSize = getDefaultTaskbarWindowSize();
         mWindowLayoutParams = createAllWindowParams();
         mLastUpdatedLayoutParams = new WindowManager.LayoutParams();
