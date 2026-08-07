@@ -260,11 +260,8 @@ public class SettingsActivity extends CollapsingToolbarBaseActivity
             Preference trustAppsPreference = screen.findPreference(KEY_TRUST_APPS);
             if (trustAppsPreference != null) {
                 trustAppsPreference.setOnPreferenceClickListener(p -> {
-                    Utilities.showLockScreen(getActivity(),
-                            getString(R.string.trust_apps_manager_name), () -> {
-                                Intent intent = new Intent(getActivity(), TrustAppsActivity.class);
-                                startActivity(intent);
-                            });
+                    Intent intent = new Intent(getActivity(), TrustAppsActivity.class);
+                    startActivity(intent);
                     return true;
                 });
             }
