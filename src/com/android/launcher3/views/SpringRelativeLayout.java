@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.EdgeEffectFactory;
+import com.android.launcher3.util.SpringEdgeEffectFactory;
 
 /**
  * View group to allow rendering overscroll effect in a child at the parent level
@@ -104,7 +105,7 @@ public class SpringRelativeLayout extends RelativeLayout {
             if (direction == DIRECTION_TOP) {
                 return new EdgeEffectProxy(getContext(), mEdgeGlowTop);
             }
-            return super.createEdgeEffect(view, direction);
+            return SpringEdgeEffectFactory.createSpringEdgeEffect(view, direction);
         }
     }
 
@@ -144,6 +145,18 @@ public class SpringRelativeLayout extends RelativeLayout {
         public void onPull(float deltaDistance, float displacement) {
             mParent.onPull(deltaDistance, displacement);
             invalidateParentScrollEffect();
+        }
+
+        @Override
+        public float onPullDistance(float deltaDistance, float displacement) {
+            float consumed = mParent.onPullDistance(deltaDistance, displacement);
+            invalidateParentScrollEffect();
+            return consumed;
+        }
+
+        @Override
+        public float getDistance() {
+            return mParent.getDistance();
         }
 
         @Override

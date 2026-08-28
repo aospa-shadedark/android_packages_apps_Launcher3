@@ -93,6 +93,7 @@ public class AllAppsRecyclerView extends FastScrollRecyclerView {
         super(context, attrs, defStyleAttr);
         mNumAppsPerRow = LauncherAppState.getIDP(context).numColumns;
         mFastScrollHelper = new AllAppsFastScrollHelper(this);
+        setEdgeEffectFactory(new com.android.launcher3.util.SpringEdgeEffectFactory());
     }
 
     /**
