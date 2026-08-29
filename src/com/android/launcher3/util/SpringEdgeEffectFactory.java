@@ -15,6 +15,7 @@
 package com.android.launcher3.util;
 
 import android.graphics.Canvas;
+import android.view.HapticFeedbackConstants;
 import android.widget.EdgeEffect;
 
 import androidx.annotation.NonNull;
@@ -47,6 +48,7 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
         private final boolean mIsVertical;
         private final float mSign;
         private float mPullDistance = 0f;
+        private boolean mWasDisplaced = false;
 
         SpringEdgeEffect(RecyclerView recyclerView, int direction) {
             super(recyclerView.getContext());
@@ -61,6 +63,12 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
             mSpringAnimation.setSpring(new SpringForce(0f)
                     .setStiffness(STIFFNESS)
                     .setDampingRatio(DAMPING_RATIO));
+            mSpringAnimation.addEndListener((animation, canceled, value, velocity) -> {
+                if (!canceled && mWasDisplaced) {
+                    mWasDisplaced = false;
+                    mRecyclerView.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+                }
+            });
         }
 
         @Override
@@ -90,12 +98,14 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
         public void onRelease() {
             if (mPullDistance != 0f) {
                 mPullDistance = 0f;
+                mWasDisplaced = true;
                 mSpringAnimation.animateToFinalPosition(0f);
             }
         }
 
         @Override
         public void onAbsorb(int velocity) {
+            mWasDisplaced = true;
             mSpringAnimation.setStartVelocity(mSign * velocity * VELOCITY_SCALE);
             mSpringAnimation.animateToFinalPosition(0f);
         }
