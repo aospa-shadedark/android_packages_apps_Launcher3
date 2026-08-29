@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2024-2026 Lunaris AOSP
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<androidx.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:launcher="http://schemas.android.com/apk/res-auto">
+
+    <co.aospa.framework.preference.CustomSeekBarPreference
+        android:key="pref_overscroll_stiffness"
+        android:title="@string/overscroll_stiffness_title"
+        android:summary="@string/overscroll_stiffness_summary"
+        android:persistent="true"
+        android:max="1000"
+        android:defaultValue="200"
+        launcher:min="50"
+        launcher:interval="10"
+        launcher:units="" />
+
+    <co.aospa.framework.preference.CustomSeekBarPreference
+        android:key="pref_overscroll_damping_ratio"
+        android:title="@string/overscroll_damping_title"
+        android:summary="@string/overscroll_damping_summary"
+        android:persistent="true"
+        android:max="100"
+        android:defaultValue="50"
+        launcher:min="10"
+        launcher:interval="5"
+        launcher:units="%" />
+
+    <co.aospa.framework.preference.CustomSeekBarPreference
+        android:key="pref_overscroll_max_stretch"
+        android:title="@string/overscroll_max_stretch_title"
+        android:summary="@string/overscroll_max_stretch_summary"
+        android:persistent="true"
+        android:max="40"
+        android:defaultValue="15"
+        launcher:min="5"
+        launcher:interval="1"
+        launcher:units="%" />
+
+    <co.aospa.framework.preference.CustomSeekBarPreference
+        android:key="pref_overscroll_velocity_scale"
+        android:title="@string/overscroll_velocity_scale_title"
+        android:summary="@string/overscroll_velocity_scale_summary"
+        android:persistent="true"
+        android:max="200"
+        android:defaultValue="60"
+        launcher:min="10"
+        launcher:interval="5"
+        launcher:units="%" />
+
+</androidx.preference.PreferenceScreen>

@@ -153,6 +153,13 @@
             </intent-filter>
         </activity>
 
+        <!-- Overscroll physics -->
+        <activity
+            android:name="com.android.launcher3.settings.SettingsOverscroll"
+            android:label="@string/overscroll_settings_title"
+            android:theme="@style/HomeSettings.Theme"
+            android:exported="true"
+            android:autoRemoveFromRecents="true" />
         <!-- Icon Pack -->
         <activity
             android:name="com.android.launcher3.icons.pack.IconPackSettingsActivity"

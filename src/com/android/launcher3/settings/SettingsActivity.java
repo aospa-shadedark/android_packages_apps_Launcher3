@@ -273,6 +273,14 @@ public class SettingsActivity extends CollapsingToolbarBaseActivity
                 setupIconPackPreference(iconPackPreference);
             }
 
+            Preference overscrollPreference = screen.findPreference("pref_overscroll_settings");
+            if (overscrollPreference != null) {
+                overscrollPreference.setOnPreferenceClickListener(p -> {
+                    startActivity(new Intent(getActivity(), SettingsOverscroll.class));
+                    return true;
+                });
+            }
+
             for (int i = screen.getPreferenceCount() - 1; i >= 0; i--) {
                 Preference preference = screen.getPreference(i);
                 if (!initPreference(preference)) {

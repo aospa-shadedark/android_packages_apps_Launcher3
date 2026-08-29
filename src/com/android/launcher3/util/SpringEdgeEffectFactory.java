@@ -14,6 +14,7 @@
 
 package com.android.launcher3.util;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.view.HapticFeedbackConstants;
 import android.widget.EdgeEffect;
@@ -24,12 +25,9 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
+import com.android.launcher3.LauncherPrefs;
 
-    private static final float STIFFNESS = SpringForce.STIFFNESS_LOW;
-    private static final float DAMPING_RATIO = SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY;
-    private static final float MAX_STRETCH_FRACTION = 0.15f;
-    private static final float VELOCITY_SCALE = 0.6f;
+public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
 
     @NonNull
     @Override
@@ -46,6 +44,8 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
         private final RecyclerView mRecyclerView;
         private final SpringAnimation mSpringAnimation;
         private final boolean mIsVertical;
+        private final float mMaxStretchFraction;
+        private final float mVelocityScale;
         private final float mSign;
         private float mPullDistance = 0f;
         private boolean mWasDisplaced = false;
@@ -56,13 +56,19 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
             mIsVertical = direction == DIRECTION_TOP || direction == DIRECTION_BOTTOM;
             mSign = (direction == DIRECTION_TOP || direction == DIRECTION_LEFT) ? 1f : -1f;
 
+            Context context = recyclerView.getContext();
+            float stiffness = LauncherPrefs.OVERSCROLL_STIFFNESS.get(context);
+            float dampingRatio = LauncherPrefs.OVERSCROLL_DAMPING_RATIO.get(context) / 100f;
+            mMaxStretchFraction = LauncherPrefs.OVERSCROLL_MAX_STRETCH.get(context) / 100f;
+            mVelocityScale = LauncherPrefs.OVERSCROLL_VELOCITY_SCALE.get(context) / 100f;
+
             DynamicAnimation.ViewProperty property =
                     mIsVertical ? DynamicAnimation.TRANSLATION_Y : DynamicAnimation.TRANSLATION_X;
 
             mSpringAnimation = new SpringAnimation(recyclerView, property, 0f);
             mSpringAnimation.setSpring(new SpringForce(0f)
-                    .setStiffness(STIFFNESS)
-                    .setDampingRatio(DAMPING_RATIO));
+                    .setStiffness(stiffness)
+                    .setDampingRatio(dampingRatio));
             mSpringAnimation.addEndListener((animation, canceled, value, velocity) -> {
                 if (!canceled && mWasDisplaced) {
                     mWasDisplaced = false;
@@ -83,7 +89,7 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
             }
             mPullDistance += deltaDistance;
             float size = mIsVertical ? mRecyclerView.getHeight() : mRecyclerView.getWidth();
-            float maxStretch = size * MAX_STRETCH_FRACTION;
+            float maxStretch = size * mMaxStretchFraction;
             float translation = Math.max(-maxStretch,
                     Math.min(maxStretch, mSign * mPullDistance * size));
 
@@ -106,7 +112,7 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
         @Override
         public void onAbsorb(int velocity) {
             mWasDisplaced = true;
-            mSpringAnimation.setStartVelocity(mSign * velocity * VELOCITY_SCALE);
+            mSpringAnimation.setStartVelocity(mSign * velocity * mVelocityScale);
             mSpringAnimation.animateToFinalPosition(0f);
         }
 
