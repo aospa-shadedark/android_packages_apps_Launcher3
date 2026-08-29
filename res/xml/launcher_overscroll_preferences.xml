@@ -57,7 +57,7 @@
         android:summary="@string/overscroll_velocity_scale_summary"
         android:persistent="true"
         android:max="200"
-        android:defaultValue="60"
+        android:defaultValue="25"
         launcher:min="10"
         launcher:interval="5"
         launcher:units="%" />
