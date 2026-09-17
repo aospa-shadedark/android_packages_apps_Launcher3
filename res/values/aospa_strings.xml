@@ -84,6 +84,5 @@
     <string name="pref_allapps_suggestions_summary">Suggestions in all apps list</string>
 
     <!-- Widget categories -->
-    <string name="widget_category_weather">Weather</string>
 
 </resources>

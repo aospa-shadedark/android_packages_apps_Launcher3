@@ -17,7 +17,7 @@
 <favorites xmlns:launcher="http://schemas.android.com/apk/res-auto/com.android.launcher3">
 
     <!-- Hotseat (We use the screen as the position of the item in the hotseat) -->
-    <!-- Messaging, [All Apps], Dialer -->
+    <!-- Messaging, Dialer -->
 
     <resolve
         launcher:container="-101"
@@ -30,8 +30,6 @@
         <favorite launcher:uri="mms:" />
         <favorite launcher:uri="mmsto:" />
     </resolve>
-
-    <!-- All Apps -->
 
     <resolve
         launcher:container="-101"

@@ -21,13 +21,13 @@
         launcher:screen="0"
         launcher:x="0"
         launcher:y="0"
-        launcher:spanX="2"
+        launcher:spanX="6"
         launcher:spanY="1"
         launcher:packageName="com.google.android.googlequicksearchbox"
         launcher:className="com.google.android.apps.gsa.staticplugins.smartspace.widget.SmartspaceWidgetProvider" />
 
     <!-- Hotseat (We use the screen as the position of the item in the hotseat) -->
-    <!-- Mail Calendar Gallery Store Internet Camera -->
+    <!-- Gmail, Chrome, YouTube, Photos -->
     <resolve
         launcher:container="-101"
         launcher:screen="0"
@@ -42,45 +42,67 @@
         launcher:screen="1"
         launcher:x="1"
         launcher:y="0" >
-        <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CALENDAR;end" />
+        <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_BROWSER;end" />
+        <favorite launcher:uri="http://www.example.com/" />
     </resolve>
 
-    <resolve
+    <favorite
+        launcher:className="com.google.android.youtube.app.honeycomb.Shell$HomeActivity"
         launcher:container="-101"
+        launcher:packageName="com.google.android.youtube"
         launcher:screen="2"
         launcher:x="2"
-        launcher:y="0" >
-        <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_GALLERY;end" />
-        <favorite launcher:uri="#Intent;type=images/*;end" />
-    </resolve>
+        launcher:y="0" />
 
     <resolve
         launcher:container="-101"
         launcher:screen="3"
         launcher:x="3"
         launcher:y="0" >
+        <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_GALLERY;end" />
+        <favorite launcher:uri="#Intent;type=images/*;end" />
+    </resolve>
+
+    <resolve
+        launcher:screen="0"
+        launcher:x="0"
+        launcher:y="4" >
         <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MARKET;end" />
         <favorite launcher:uri="market://details?id=com.android.launcher" />
     </resolve>
 
-    <resolve
-        launcher:container="-101"
-        launcher:screen="4"
-        launcher:x="4"
-        launcher:y="0" >
+    <folder
+        launcher:screen="0"
+        launcher:title="@string/google_folder_title"
+        launcher:x="1"
+        launcher:y="4">
         <favorite
-            launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_BROWSER;end" />
-        <favorite launcher:uri="http://www.example.com/" />
-    </resolve>
+            launcher:className="com.google.android.googlequicksearchbox.SearchActivity"
+            launcher:packageName="com.google.android.googlequicksearchbox" />
+        <favorite
+            launcher:className="com.google.android.maps.MapsActivity"
+            launcher:packageName="com.google.android.apps.maps" />
+        <favorite
+            launcher:className="com.google.android.apps.docs.app.NewMainProxyActivity"
+            launcher:packageName="com.google.android.apps.docs" />
+    </folder>
 
-    <!-- Resolve camera intent if GoogleCamera is not available e.g. on emulator -->
-    <resolve
-        launcher:container="-101"
-        launcher:screen="5"
-        launcher:x="5"
-        launcher:y="0" >
-        <favorite launcher:uri="#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end" />
-        <favorite launcher:uri="#Intent;action=android.intent.action.CAMERA_BUTTON;end" />
-    </resolve>
+    <appwidget
+        launcher:className="com.android.alarmclock.AnalogAppWidgetProvider"
+        launcher:packageName="com.google.android.deskclock"
+        launcher:screen="0"
+        launcher:spanX="2"
+        launcher:spanY="2"
+        launcher:x="0"
+        launcher:y="1" />
+
+    <appwidget
+        launcher:className="com.android.calendar.widget.CalendarAppWidgetProvider"
+        launcher:packageName="com.google.android.calendar"
+        launcher:screen="0"
+        launcher:spanX="2"
+        launcher:spanY="2"
+        launcher:x="4"
+        launcher:y="3" />
 
 </favorites>
