@@ -667,7 +667,6 @@
     <string name="seven_sided_cookie_shape_title">7-sided cookie</string>
     <!-- label for arch shape option in customization picker -->
     <string name="arch_shape_title">Arch</string>
-
     <!-- Strings for home screen files -->
     <!-- Text for create new folder button [CHAR LIMIT=30] -->
     <string name="create_new_folder_button_text">New folder</string>
@@ -745,4 +744,16 @@
     <string name="icon_picker_no_icons">This icon pack has no selectable icons</string>
     <string name="icon_picker_no_matching_icons">No icons match your search</string>
 
+    <!-- Rename app additions -->
+    <string name="rename_app_hide_name">Hide app name</string>
+    <string name="rename_app_updated">App name updated</string>
+
+    <!-- Accessibility announcements for workspace icon resizing. -->
+    <string name="folder_resized">Folder resized to width %1$d height %2$d</string>
+    <string name="folder_frame_name">Resize folder %1$s</string>
+    <string name="icon_frame_name">Resize icon %1$s</string>
+    <string name="icon_resized">Icon resized</string>
+    <string name="increase_icon_size">Increase icon size</string>
+    <string name="decrease_icon_size">Decrease icon size</string>
+    <string name="reset_icon_size">Reset icon size</string>
 </resources>

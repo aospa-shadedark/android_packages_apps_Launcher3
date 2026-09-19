@@ -25,6 +25,7 @@ import com.android.launcher3.LauncherSettings.Favorites.CELLX
 import com.android.launcher3.LauncherSettings.Favorites.CELLY
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER
 import com.android.launcher3.LauncherSettings.Favorites.ICON
+import com.android.launcher3.LauncherSettings.Favorites.ICON_SIZE_DP
 import com.android.launcher3.LauncherSettings.Favorites.INTENT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE
 import com.android.launcher3.LauncherSettings.Favorites.OPTIONS
@@ -53,6 +54,7 @@ open class ModelCursorWrapper(cursor: Cursor, private val queriedColumns: Array<
     val spanY: Int by SPANY.delegateInt()
     val rank: Int by RANK.delegateInt()
     val options: Int by OPTIONS.delegateInt()
+    val iconSizeDp: Int by ICON_SIZE_DP.delegate { if (it < 0) 0 else maxOf(0, getInt(it)) }
     val screen: Int by SCREEN.delegateInt()
     val itemType: Int by ITEM_TYPE.delegateInt()
 

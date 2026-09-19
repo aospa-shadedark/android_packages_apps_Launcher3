@@ -601,4 +601,10 @@
     <!-- Icon picker -->
     <dimen name="icon_picker_cell_size">56dp</dimen>
     <dimen name="icon_picker_cell_padding">8dp</dimen>
+
+    <!-- Resizable workspace icon / folder outline and handles -->
+    <dimen name="folder_resize_outline_stroke_width">2dp</dimen>
+    <dimen name="folder_resize_handle_stroke_width">8dp</dimen>
+    <dimen name="folder_resize_handle_length">32dp</dimen>
+    <dimen name="folder_resize_handle_touch_size">48dp</dimen>
 </resources>
