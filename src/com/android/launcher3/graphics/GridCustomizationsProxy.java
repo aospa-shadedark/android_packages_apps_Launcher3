@@ -54,6 +54,8 @@ import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.deviceprofile.parser.GridOption;
 import com.android.launcher3.graphics.theme.ThemePreference;
+import com.android.launcher3.icons.pack.IconPackInfo;
+import com.android.launcher3.icons.pack.IconPackManager;
 import com.android.launcher3.preview.PreviewLifecycleObserver;
 import com.android.launcher3.preview.PreviewSurfaceRenderer;
 import com.android.launcher3.shapes.IconShapeModel;
@@ -126,6 +128,12 @@ public class GridCustomizationsProxy implements ProxyProvider {
     private static final String METHOD_GET_PREVIEW = "get_preview";
     public static final String METHOD_GET_PREVIEW_BITMAP = "get_preview_bitmap";
 
+    /** These methods are used to choose an installed icon pack */
+    public static final String LIST_ICON_PACKS = "/list_icon_packs";
+    public static final String ICON_PACK = "/icon_pack";
+    public static final String KEY_ICON_PACK_PACKAGE = "icon_pack_package";
+    public static final String KEY_ICON_PACK_LABEL = "icon_pack_label";
+
     /** These methods are used to set monochrome theme */
     private static final String GET_ICON_THEMED = "/get_icon_themed";
     private static final String SET_ICON_THEMED = "/set_icon_themed";
@@ -156,6 +164,7 @@ public class GridCustomizationsProxy implements ProxyProvider {
 
     private final Context mContext;
     private final ThemePreference mThemePreference;
+    private final IconPackManager mIconPackManager;
     private final LauncherPrefs mPrefs;
     private final InvariantDeviceProfile mIdp;
 
@@ -163,12 +172,14 @@ public class GridCustomizationsProxy implements ProxyProvider {
     protected GridCustomizationsProxy(
             @ApplicationContext Context context,
             ThemePreference themePreference,
+            IconPackManager iconPackManager,
             LauncherPrefs prefs,
             InvariantDeviceProfile idp,
             DaggerSingletonTracker lifeCycle
     ) {
         mContext = context;
         mThemePreference = themePreference;
+        mIconPackManager = iconPackManager;
         mPrefs = prefs;
         mIdp = idp;
         lifeCycle.addCloseable(() -> mActivePreviews.forEach(PreviewLifecycleObserver::binderDied));
@@ -246,6 +257,21 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 }
                 return cursor;
             }
+            case LIST_ICON_PACKS: {
+                MatrixCursor cursor = new MatrixCursor(
+                        new String[]{KEY_ICON_PACK_PACKAGE, KEY_ICON_PACK_LABEL});
+                for (IconPackInfo pack : mIconPackManager.getAvailablePacks()) {
+                    cursor.newRow()
+                            .add(KEY_ICON_PACK_PACKAGE, pack.getPackageName())
+                            .add(KEY_ICON_PACK_LABEL, pack.getLabel());
+                }
+                return cursor;
+            }
+            case ICON_PACK: {
+                MatrixCursor cursor = new MatrixCursor(new String[]{KEY_ICON_PACK_PACKAGE});
+                cursor.newRow().add(KEY_ICON_PACK_PACKAGE, mIconPackManager.getSelectedPack());
+                return cursor;
+            }
             case GET_ICON_THEMED:
             case ICON_THEMED: {
                 MatrixCursor cursor = new MatrixCursor(new String[]{BOOLEAN_VALUE});
@@ -318,6 +344,13 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 mPrefs.put(PREF_ICON_SHAPE,
                         requireNonNullElse(values.getAsString(KEY_SHAPE_KEY), ""));
                 return UPDATE_SETTING_SUCCESS;
+            case ICON_PACK: {
+                mIconPackManager.setSelectedPack(
+                        requireNonNullElse(values.getAsString(KEY_ICON_PACK_PACKAGE), ""));
+                // The cached icons only get revalidated when the model reloads.
+                LauncherAppState.getInstance(mContext).getModel().forceReload("icon_pack_changed");
+                return UPDATE_SETTING_SUCCESS;
+            }
             case ICON_THEMED:
             case SET_ICON_THEMED: {
                 if (values.getAsBoolean(BOOLEAN_VALUE)) {

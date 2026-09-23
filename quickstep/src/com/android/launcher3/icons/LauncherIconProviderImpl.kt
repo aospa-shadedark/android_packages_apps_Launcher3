@@ -30,6 +30,7 @@ import com.android.launcher3.graphics.ShapeDelegate.Circle
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.icons.cache.CachingLogic
 import com.android.launcher3.icons.cache.LauncherActivityCachingLogic
+import com.android.launcher3.icons.pack.IconPackManager
 import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
@@ -49,12 +50,14 @@ class LauncherIconProviderImpl
 constructor(
     @ApplicationContext ctx: Context,
     themeManager: ThemeManager,
+    iconPackManager: IconPackManager,
     private val modelProvider: Provider<LauncherModel>,
     private val iconChangeTracker: IconChangeTracker,
     private val iconCacheProvider: Provider<IconCache>,
     pluginManagerWrapper: PluginManagerWrapper,
     lifecycle: DaggerSingletonTracker,
-) : LauncherIconProvider(ctx, themeManager), PluginListener<IconProcessorPlugin> {
+) : LauncherIconProvider(ctx, themeManager, iconPackManager),
+    PluginListener<IconProcessorPlugin> {
 
     init {
         pluginManagerWrapper.addPluginListener(this, IconProcessorPlugin::class.java)
@@ -76,6 +79,11 @@ constructor(
     ): Drawable? {
         fun Drawable.preprocess(resId: Int) =
             processor?.preprocessDrawable(this, resId, appInfo) ?: this
+
+        // A pack's icon is final, so it skips the plugin preprocessing below.
+        getIconPackIcon(info, density)?.let {
+            return it
+        }
 
         try {
             val resources = mContext.packageManager.getResourcesForApplication(appInfo)

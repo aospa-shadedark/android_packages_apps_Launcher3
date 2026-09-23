@@ -16,17 +16,26 @@
 package com.android.launcher3.icons;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.ComponentInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.launcher3.R;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.graphics.ThemeManager;
+import com.android.launcher3.icons.pack.IconPack;
+import com.android.launcher3.icons.pack.IconPackManager;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -46,19 +55,52 @@ public class LauncherIconProvider extends IconProvider {
     private static final String ATTR_DRAWABLE = "drawable";
 
     private static final String TAG = "LIconProvider";
+    private static final String ICON_PACK_SEPARATOR = "#";
     private static final Map<String, ThemeData> DISABLED_MAP = Collections.emptyMap();
 
     private Map<String, ThemeData> mThemedIconMap;
 
     protected final ThemeManager mThemeManager;
+    private final IconPackManager mIconPackManager;
 
     @Inject
     public LauncherIconProvider(
             @ApplicationContext Context context,
-            ThemeManager themeManager) {
+            ThemeManager themeManager,
+            IconPackManager iconPackManager) {
         super(context);
         mThemeManager = themeManager;
+        mIconPackManager = iconPackManager;
         mThemedIconMap = FeatureFlags.USE_LOCAL_ICON_OVERRIDES.get() ? null : DISABLED_MAP;
+    }
+
+    /**
+     * A selected pack also replaces the dynamic clock and calendar icons, which the base class
+     * resolves before it ever reaches {@link #loadPackageIcon}.
+     */
+    @Override
+    public Drawable getIcon(ComponentInfo info, int iconDpi) {
+        Drawable icon = getIconPackIcon(info, iconDpi);
+        return icon != null ? icon : super.getIcon(info, iconDpi);
+    }
+
+    /**
+     * The selected icon pack's icon for {@code info}, or null when no pack is selected or the
+     * pack does not name that component.
+     *
+     * <p>Subclasses that reimplement {@link #loadPackageIcon} must consult this first.
+     */
+    @Nullable
+    protected Drawable getIconPackIcon(@NonNull PackageItemInfo info, int density) {
+        IconPack pack = mIconPackManager.getPack();
+        return pack == null ? null : pack.getIcon(info, density);
+    }
+
+    @Override
+    protected Drawable loadPackageIcon(
+            @NonNull PackageItemInfo info, @NonNull ApplicationInfo appInfo, int density) {
+        Drawable icon = getIconPackIcon(info, density);
+        return icon != null ? icon : super.loadPackageIcon(info, appInfo, density);
     }
 
     @Override
@@ -69,8 +111,10 @@ public class LauncherIconProvider extends IconProvider {
     @Override
     public void updateSystemState() {
         super.updateSystemState();
+        // Part of the theme value so that choosing another pack invalidates every cached icon.
         mSystemState = mSystemState.withTheme(
-                mThemeManager.getIconState().getThemeCode(),
+                mThemeManager.getIconState().getThemeCode()
+                        + ICON_PACK_SEPARATOR + mIconPackManager.getSelectedPack(),
                 mThemeManager.getIconState().isCircle());
     }
 
