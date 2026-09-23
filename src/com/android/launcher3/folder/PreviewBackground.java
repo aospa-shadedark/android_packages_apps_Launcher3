@@ -379,6 +379,13 @@ public class PreviewBackground extends DelegatedCellDrawing {
         return mPath;
     }
 
+    /** Copies the visible folder shape, without the overlap used to clip preview app icons. */
+    public void getDrawnShapePath(android.graphics.Path outPath) {
+        mPath.reset();
+        getShape().addToPath(mPath, getOffsetX(), getOffsetY(), getScaledRadius());
+        outPath.set(mPath.getPath());
+    }
+
     private void delegateDrawing(CellLayout delegate, int cellX, int cellY) {
         if (mDrawingDelegate != delegate) {
             delegate.addDelegatedCellDrawing(this);

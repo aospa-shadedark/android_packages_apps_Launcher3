@@ -724,6 +724,7 @@
     <string name="app_info_version_value" translatable="false">%1$s (%2$d)</string>
     <string name="app_info_source">Source</string>
     <string name="app_info_source_system">System</string>
+    <string name="app_info_unknown">Unknown</string>
     <string name="app_info_last_update">Last update</string>
     <string name="app_info_version">Version</string>
     <string name="app_info_more">More</string>
@@ -731,6 +732,7 @@
     <!-- Icon pack -->
     <string name="icon_pack_title">Icon pack</string>
     <string name="icon_pack_default_label">Default</string>
+    <string name="icon_pack_use_global">Use global icon pack</string>
     <string name="icon_pack_add">Install more</string>
     <string name="icon_pack_no_market">There\'s no available app store</string>
 
@@ -739,6 +741,8 @@
     <string name="app_info_custom_icon_summary">Pick any icon from any icon pack</string>
     <string name="icon_picker_search_hint">Search icons</string>
     <string name="icon_picker_choose_pack">Choose an icon pack</string>
+    <string name="icon_picker_reset">Reset custom icon</string>
+    <string name="icon_picker_loading">Loading icons…</string>
     <string name="icon_picker_back_content_description">Back to icon packs</string>
     <string name="icon_picker_no_packs">No icon packs found</string>
     <string name="icon_picker_no_icons">This icon pack has no selectable icons</string>
@@ -780,4 +784,9 @@
     <string name="overscroll_max_stretch_summary">How far the list can be pulled past its edge, as a percentage of its size</string>
     <string name="overscroll_velocity_scale_title">Fling velocity scale</string>
     <string name="overscroll_velocity_scale_summary">How strongly a fling at the edge feeds into the overscroll spring</string>
+
+    <!-- Folder thumbnail -->
+    <string name="folder_thumbnail_set">Folder thumbnail</string>
+    <string name="folder_thumbnail_reset">Reset thumbnail</string>
+    <string name="folder_thumbnail_failed">Couldn\'t use that image</string>
 </resources>
