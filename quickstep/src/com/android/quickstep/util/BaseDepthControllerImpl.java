@@ -126,6 +126,8 @@ public class BaseDepthControllerImpl<
 
     protected boolean mWaitingOnSurfaceValidity;
 
+    private boolean mWorkspaceBlurActive = false;
+
     private SurfaceControl mBlurSurface = null;
     /**
      * Info for early wakeup requests to SurfaceFlinger.
@@ -265,6 +267,7 @@ public class BaseDepthControllerImpl<
                 Log.v(TAG, "Skipping small blur delta. newBlur: " + newBlur + " previousBlur: "
                         + previousBlur + " delta: " + delta + " surface: " + blurSurface);
             }
+            onSmallBlurDeltaSkipped();
             return;
         }
         mCurrentBlur = newBlur;
@@ -299,6 +302,8 @@ public class BaseDepthControllerImpl<
     }
 
     protected void onDepthAndBlurApplied() {}
+
+    protected void onSmallBlurDeltaSkipped() {}
 
     /**
      * Sets the early wakeup state.
