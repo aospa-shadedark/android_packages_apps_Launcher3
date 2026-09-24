@@ -382,6 +382,7 @@
     <!-- Base theme for BubbleTextView and sub classes -->
     <style name="BaseIcon" parent="BaseIconUnBounded">
         <item name="android:lines">1</item>
+        <item name="android:fontFamily">variable-title-small</item>
     </style>
 
     <!-- Base theme for AllApps BubbleTextViews -->
@@ -392,7 +393,6 @@
         <item name="android:paddingLeft">@dimen/dynamic_grid_cell_padding_x</item>
         <item name="android:paddingRight">@dimen/dynamic_grid_cell_padding_x</item>
         <item name="android:textColor">@color/materialColorOnSurface</item>
-        <item name="android:fontFamily">variable-title-small</item>
     </style>
 
 

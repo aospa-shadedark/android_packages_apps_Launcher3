@@ -35,6 +35,7 @@
         android:singleLine="true"
         android:ellipsize="end"
         android:textSize="14sp"
+        android:fontFamily="variable-label-large"
         android:textColor="?attr/popupTextColor"
         launcher:layoutHorizontal="true"
         launcher:iconDisplay="shortcut_popup"

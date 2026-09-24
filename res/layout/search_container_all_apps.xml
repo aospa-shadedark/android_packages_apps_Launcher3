@@ -39,4 +39,5 @@
     android:singleLine="true"
     android:textColor="@color/materialColorOnSurface"
     android:textColorHint="?attr/allAppsSearchTextColor"
+    android:fontFamily="variable-body-large"
     android:textSize="20sp" />
