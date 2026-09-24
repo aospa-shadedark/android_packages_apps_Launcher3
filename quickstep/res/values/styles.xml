@@ -254,6 +254,7 @@
         <item name="android:paddingHorizontal">@dimen/overview_actions_button_horizontal_padding
         </item>
         <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">variable-label-large</item>
         <item name="android:textColor">@color/overview_button</item>
         <item name="android:drawableTint">@color/overview_button</item>
         <item name="android:tint">@color/materialColorOnSurface</item>
