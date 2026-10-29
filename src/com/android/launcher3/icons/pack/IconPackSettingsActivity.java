@@ -144,9 +144,18 @@ public final class IconPackSettingsActivity extends CollapsingToolbarBaseActivit
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         if (intent.resolveActivity(getPackageManager()) == null) {
-            Toast.makeText(this, R.string.icon_pack_no_market, Toast.LENGTH_LONG)
-                .show();
-            return false;
+            try {
+                Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                        android.net.Uri.parse("https://play.google.com/store/search?q="
+                                + android.net.Uri.encode(query) + "&c=apps"));
+                webIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(webIntent);
+                return true;
+            } catch (Exception e) {
+                Toast.makeText(this, R.string.icon_pack_no_market, Toast.LENGTH_LONG)
+                    .show();
+                return false;
+            }
         }
 
         startActivity(intent);

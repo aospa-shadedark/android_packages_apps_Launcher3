@@ -32,6 +32,7 @@ import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.AbstractFloatingViewHelper;
 import com.android.launcher3.DropTargetHandler;
 import com.android.launcher3.Flags;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
@@ -247,20 +248,38 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
 
         @Override
         public void onClick(View view) {
-            InfoBottomSheet cbs;
             dismissTaskMenuView();
             Rect sourceBounds = Utilities.getViewBounds(view);
             ActivityOptionsWrapper options = mTarget.getActivityLaunchOptions(view, mItemInfo);
-            try {
-                cbs = (InfoBottomSheet) mTarget.getLayoutInflater().inflate(
-                        R.layout.app_info_bottom_sheet,
-                        mTarget.getDragLayer(),
-                        false);
-                cbs.configureBottomSheet(sourceBounds, view.getContext());
-                cbs.populateAndShow(mItemInfo);
-            } catch (InflateException e) {
+
+            boolean fromRecents = (mItemInfo.itemType == ITEM_TYPE_TASK);
+            if (!fromRecents) {
+                if (mTarget instanceof Launcher) {
+                    fromRecents = ((Launcher) mTarget)
+                            .getStateManager()
+                            .getState()
+                            .isRecentsViewVisible;
+                } else {
+                    fromRecents = true;
+                }
+            }
+
+            if (fromRecents) {
                 PackageManagerHelper.startDetailsActivityForInfo(view.getContext(), mItemInfo,
                         sourceBounds, options.toBundle());
+            } else {
+                try {
+                    InfoBottomSheet cbs = (InfoBottomSheet) mTarget.getLayoutInflater().inflate(
+                            R.layout.app_info_bottom_sheet,
+                            mTarget.getDragLayer(),
+                            false);
+                    cbs.configureBottomSheet(sourceBounds, view.getContext());
+                    cbs.populateAndShow(mItemInfo);
+                } catch (Exception e) {
+                    Log.e("SystemShortcut", "Failed to show InfoBottomSheet, fallback to details", e);
+                    PackageManagerHelper.startDetailsActivityForInfo(view.getContext(), mItemInfo,
+                            sourceBounds, options.toBundle());
+                }
             }
             mTarget.getStatsLogManager().logger().withItemInfo(mItemInfo)
                     .log(LAUNCHER_SYSTEM_SHORTCUT_APP_INFO_TAP);

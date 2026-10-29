@@ -2,18 +2,15 @@ package com.android.launcher3.util;
 
 import android.content.Context;
 import android.content.pm.LauncherActivityInfo;
-import android.content.pm.ShortcutInfo;
 import android.os.UserHandle;
 
 import com.android.launcher3.LauncherAppState;
-import com.android.launcher3.LauncherModel;
+import com.android.launcher3.dagger.LauncherComponentProvider;
 import android.content.pm.LauncherApps;
 import android.os.UserManager;
-import com.android.launcher3.util.ComponentKey;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.android.launcher3.customization.IconDatabase;
@@ -31,13 +28,11 @@ public class AppReloader {
     }
 
     private final Context mContext;
-    private final LauncherModel mModel;
     private final UserManager mUsers;
     private final LauncherApps mApps;
 
     private AppReloader(Context context) {
         mContext = context;
-        mModel = LauncherAppState.getInstance(context).getModel();
         mUsers = context.getSystemService(UserManager.class);
         mApps = context.getSystemService(LauncherApps.class);
     }
@@ -70,16 +65,22 @@ public class AppReloader {
     }
 
     public void reload(ComponentKey key) {
-        reload(key.user, key.componentName.getPackageName());
+        MODEL_EXECUTOR.execute(() -> reload(key.user, key.componentName.getPackageName()));
     }
 
     public void reload(Collection<ComponentKey> keys) {
+        Set<PackageUserKey> packages = new HashSet<>();
         for (ComponentKey key : keys) {
-            reload(key);
+            packages.add(new PackageUserKey(key.componentName.getPackageName(), key.user));
         }
+        MODEL_EXECUTOR.execute(() -> packages.forEach(key -> reload(key.mUser, key.mPackageName)));
     }
 
     private void reload(UserHandle user, String pkg) {
-        mModel.newModelCallbacks().onPackageChanged(pkg, user);
+        LauncherAppState appState = LauncherAppState.getInstance(mContext);
+        appState.getIconProvider().updateSystemState();
+        // ModelInitializer updates the cache and model on its model executor; RecentsModel
+        // invalidates task icons from the same event. Avoid a second independent reload path.
+        LauncherComponentProvider.get(mContext).getIconChangeTracker().notifyIconChanged(pkg, user);
     }
 }
