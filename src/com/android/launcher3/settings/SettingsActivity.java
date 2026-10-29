@@ -268,6 +268,11 @@ public class SettingsActivity extends CollapsingToolbarBaseActivity
                 });
             }
 
+            Preference iconPackPreference = screen.findPreference(IconDatabase.KEY_ICON_PACK);
+            if (iconPackPreference != null) {
+                setupIconPackPreference(iconPackPreference);
+            }
+
             for (int i = screen.getPreferenceCount() - 1; i >= 0; i--) {
                 Preference preference = screen.getPreference(i);
                 if (!initPreference(preference)) {
