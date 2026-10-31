@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
@@ -66,10 +67,15 @@ public class IconPackManager extends BroadcastReceiver {
     private final Context mContext;
     private final Map<String, IconPack> mProviders = new ConcurrentHashMap<>();
     private final Handler mHandler = new Handler(MODEL_EXECUTOR.getLooper());
+    private boolean mPendingRefresh;
 
     private IconPackManager(Context context) {
         mContext = context;
-        reloadProviders();
+        if (context.getSystemService(UserManager.class).isUserUnlocked()) {
+            reloadProviders();
+        } else {
+            mPendingRefresh = true;
+        }
 
         IntentFilter filter = new IntentFilter();
         filter.addDataScheme("package");
@@ -81,10 +87,28 @@ public class IconPackManager extends BroadcastReceiver {
         // Called when any app has been installed, enabled, disabled, updated or deleted.
         context.getApplicationContext().registerReceiver(
                 this, filter, null, mHandler, Context.RECEIVER_NOT_EXPORTED);
+
+        IntentFilter unlockFilter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
+        context.getApplicationContext().registerReceiver(
+                this, unlockFilter, null, mHandler, Context.RECEIVER_NOT_EXPORTED);
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
+            if (mPendingRefresh) {
+                mPendingRefresh = false;
+                reloadProviders();
+                AppReloader.get(mContext).reload();
+            }
+            return;
+        }
+
+        if (!mContext.getSystemService(UserManager.class).isUserUnlocked()) {
+            mPendingRefresh = true;
+            return;
+        }
+
         if (intent.getData() != null) {
             String pkg = intent.getData().getEncodedSchemeSpecificPart();
             if (pkg != null) {
