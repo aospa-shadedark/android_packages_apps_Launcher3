@@ -77,7 +77,11 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
 
         @Override
         public void onPull(float deltaDistance, float displacement) {
+            // A new pull can interrupt the return spring. Rebase the pull distance from
+            // the current view translation before cancelling so the next pull continues
+            // from the visible stretch instead of jumping from a stale distance.
             if (mSpringAnimation.isRunning()) {
+                updatePullDistanceFromTranslation();
                 mSpringAnimation.cancel();
             }
             mPullDistance = Math.max(0f,
@@ -92,6 +96,19 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
             } else {
                 mRecyclerView.setTranslationX(translation);
             }
+        }
+
+        private void updatePullDistanceFromTranslation() {
+            float size = mIsVertical ? mRecyclerView.getHeight() : mRecyclerView.getWidth();
+            if (size <= 0f) {
+                mPullDistance = 0f;
+                return;
+            }
+
+            float translation = mIsVertical
+                    ? mRecyclerView.getTranslationY() : mRecyclerView.getTranslationX();
+            mPullDistance = Math.max(0f,
+                    Math.min(mMaxStretchFraction, mSign * translation / size));
         }
 
         @Override
