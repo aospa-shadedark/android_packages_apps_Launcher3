@@ -133,11 +133,14 @@ public class SpringEdgeEffectFactory extends RecyclerView.EdgeEffectFactory {
 
         @Override
         public void onRelease() {
-            if (mPullDistance != 0f) {
-                mPullDistance = 0f;
+            // Always settle the view on release. RecyclerView may report a zero pull
+            // distance after a gesture interruption while its translation is still offset.
+            boolean wasStretched = mPullDistance != 0f;
+            mPullDistance = 0f;
+            if (wasStretched) {
                 mRecyclerView.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
-                mSpringAnimation.animateToFinalPosition(0f);
             }
+            mSpringAnimation.animateToFinalPosition(0f);
         }
 
         @Override
