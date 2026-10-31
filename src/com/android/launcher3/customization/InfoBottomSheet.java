@@ -32,6 +32,8 @@ import com.android.launcher3.settings.preference.ReloadingListPreference;
 import com.android.launcher3.util.AppReloader;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.PackageManagerHelper;
+import com.android.launcher3.util.SystemUiController;
+import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.AbstractSlideInView;
 
 /** App details owned by the floating view, with no fragment to restore after it is dismissed. */
@@ -124,6 +126,9 @@ public class InfoBottomSheet extends AbstractSlideInView<BaseActivity> {
 
         mList.setAdapter(new PreferenceGroupAdapter(mPreferences));
         attachToContainer();
+        mActivityContext.getSystemUiController().updateUiState(
+                SystemUiController.UI_STATE_APP_INFO,
+                Themes.getAttrBoolean(getContext(), R.attr.isWorkspaceDarkText));
         mPreferences.onAttached();
         mPreferencesAttached = true;
         mIsOpen = true;
@@ -196,6 +201,8 @@ public class InfoBottomSheet extends AbstractSlideInView<BaseActivity> {
     protected void onDetachedFromWindow() {
         if (mDialog != null) mDialog.dismiss();
         mList.setAdapter(null);
+        mActivityContext.getSystemUiController().updateUiState(
+                SystemUiController.UI_STATE_APP_INFO, 0);
         if (mPreferencesAttached) {
             mPreferences.onDetached();
             mPreferencesAttached = false;
