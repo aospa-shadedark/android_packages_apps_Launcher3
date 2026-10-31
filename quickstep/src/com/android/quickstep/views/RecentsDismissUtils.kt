@@ -369,7 +369,7 @@ constructor(
                             } else {
                                 val recentTasks = ActivityTaskManager.getInstance().getRecentTasks(
                                     Int.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE,
-                                    activityManagerWrapper.currentUserId)
+                                    Process.myUserHandle().identifier)
                                 for (task in recentTasks) {
                                     val pkg = (task.realActivity ?: task.baseIntent.component)
                                         ?.packageName
