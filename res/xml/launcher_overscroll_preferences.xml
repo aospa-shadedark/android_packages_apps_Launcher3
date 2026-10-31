@@ -24,7 +24,7 @@
         android:summary="@string/overscroll_stiffness_summary"
         android:persistent="true"
         android:max="1000"
-        android:defaultValue="200"
+        android:defaultValue="300"
         launcher:min="50"
         launcher:interval="10"
         launcher:units="" />
@@ -35,7 +35,7 @@
         android:summary="@string/overscroll_damping_summary"
         android:persistent="true"
         android:max="100"
-        android:defaultValue="50"
+        android:defaultValue="75"
         launcher:min="10"
         launcher:interval="5"
         launcher:units="%" />
@@ -46,7 +46,7 @@
         android:summary="@string/overscroll_max_stretch_summary"
         android:persistent="true"
         android:max="40"
-        android:defaultValue="15"
+        android:defaultValue="12"
         launcher:min="5"
         launcher:interval="1"
         launcher:units="%" />
